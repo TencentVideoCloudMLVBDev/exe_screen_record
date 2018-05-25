@@ -28,10 +28,10 @@ public:
 	virtual ~TXCloudRecordCmd();
 	static TXCloudRecordCmd& instance();
 
-	int runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID = -1);
-	void exit();
+	bool runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID = -1);
 	void start();
 	void stop();
+	void exit();
 
 private:
 	HWND m_recordHwnd = nullptr;

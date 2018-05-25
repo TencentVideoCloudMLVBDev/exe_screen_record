@@ -16,11 +16,14 @@
     <Filter Include="Common">
       <UniqueIdentifier>{41ab400a-ef31-4a74-84a6-db28a2212a34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty">
-      <UniqueIdentifier>{8d026273-d21b-475d-a29f-a61d1de0196a}</UniqueIdentifier>
+    <Filter Include="RecordSDK">
+      <UniqueIdentifier>{d3ce9481-aa19-46e6-a25e-8e680f620257}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty\jsoncpp">
-      <UniqueIdentifier>{4bfbd28e-7809-420e-a065-ab7225824dd2}</UniqueIdentifier>
+    <Filter Include="RecordSDK\json">
+      <UniqueIdentifier>{1cfb522f-ea75-4f0e-ab61-ff79cba3fd32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RecordSDK\TXCloudRecord">
+      <UniqueIdentifier>{ba4e563a-1f14-4c77-90a4-0941de6e3e7f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,17 +36,20 @@
     <ClInclude Include="Application.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\jsoncpp\json.h">
-      <Filter>thirdparty\jsoncpp</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\jsoncpp\json-forwards.h">
-      <Filter>thirdparty\jsoncpp</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Base.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordSDK\jsoncpp\json.h">
+      <Filter>RecordSDK\json</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordSDK\jsoncpp\json-forwards.h">
+      <Filter>RecordSDK\json</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordSDK\TXCloudRecord\include\TXCloudRecordCmd.h">
+      <Filter>RecordSDK\TXCloudRecord</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -59,11 +65,14 @@
     <ClCompile Include="Application.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\jsoncpp\jsoncpp.cpp">
-      <Filter>thirdparty\jsoncpp</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.cpp">
       <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="RecordSDK\jsoncpp\jsoncpp.cpp">
+      <Filter>RecordSDK\json</Filter>
+    </ClCompile>
+    <ClCompile Include="RecordSDK\TXCloudRecord\include\TXCloudRecordCmd.cpp">
+      <Filter>RecordSDK\TXCloudRecord</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

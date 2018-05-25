@@ -324,13 +324,13 @@ int Application::run(int &argc, char **argv)
 			recordExe = root["recordExe"].asString();
 		}
 
-		int winID = 0;
+		int winID = -1;
 		if (root.isMember("winID"))
 		{
 			winID = root["winID"].asInt();
 		}
 
-		if (recordExe.empty() && winID == 0)
+		if (recordExe.empty() && winID == -1)
 		{
 			LINFO(L"empty recordExe name && winID");
 			break;

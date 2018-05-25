@@ -81,16 +81,20 @@ TXCloudRecordCmd& TXCloudRecordCmd::instance()
 	return uniqueInstance;
 }
 
-int TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID)
+bool TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID)
 {
 	LOGGER;
-
+	BOOL ret = FALSE;
+	if (recordType == RecordScreenNone || recordUrl.empty() || (recordExe.empty() && winID == -1))
+	{
+		return ret;
+	}
 	do
 	{
 		Json::Value root;
 		root["recordUrl"] = recordUrl;
 		root["recordExe"] = recordExe; //需要录制的exe名称。启动record之前就需要运行
-										 //root["winID"] = (int)GetDesktopWindow();  //需要录制的窗口句柄。winID和recordExe必须传一个，都传会录制recordExe内容
+		//root["winID"] = (int)GetDesktopWindow();  //需要录制的窗口句柄。winID和recordExe必须传一个，都传会录制recordExe内容
 		if (recordExe.empty() && winID != -1)
 		{
 			root["winID"] = winID;
@@ -130,7 +134,7 @@ int TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string reco
 		sei.hIcon = NULL;
 		sei.hProcess = NULL;
 
-		BOOL ret = ::ShellExecuteExA(&sei);
+		ret = ::ShellExecuteExA(&sei);
 		if (FALSE == ret)
 		{
 			LERROR(L"ShellExecuteExW failed: %lu", ::GetLastError());
@@ -138,7 +142,7 @@ int TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string reco
 		}
 
 	} while (0);
-	return 0;
+	return ret;
 }
 
 void TXCloudRecordCmd::exit()
