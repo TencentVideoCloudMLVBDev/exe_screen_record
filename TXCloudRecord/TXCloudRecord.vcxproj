@@ -162,7 +162,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
+    <ClInclude Include="TXCloudRecord.h" />
     <ClInclude Include="Common\Base.h" />
     <ClInclude Include="Common\crashdump.h" />
     <ClInclude Include="Common\log.h" />
@@ -170,7 +170,7 @@
     <ClInclude Include="thirdparty\jsoncpp\json.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
+    <ClCompile Include="TXCloudRecord.cpp" />
     <ClCompile Include="Common\crashdump.cpp" />
     <ClCompile Include="Common\log.cpp" />
     <ClCompile Include="main.cpp" />

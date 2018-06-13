@@ -39,9 +39,6 @@
     <ClInclude Include="Common\Base.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="RecordSDK\jsoncpp\json.h">
       <Filter>RecordSDK\json</Filter>
     </ClInclude>
@@ -64,9 +61,6 @@
     </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.cpp">
-      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="RecordSDK\jsoncpp\jsoncpp.cpp">
       <Filter>RecordSDK\json</Filter>

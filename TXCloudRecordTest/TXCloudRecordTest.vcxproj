@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F5E312A3-315F-47A2-846B-FE1876FFDBC2}</ProjectGuid>
+    <ProjectGuid>{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TXCloudUpdate</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -173,7 +173,6 @@
     <ClInclude Include="RecordSDK\jsoncpp\json-forwards.h" />
     <ClInclude Include="RecordSDK\jsoncpp\json.h" />
     <ClInclude Include="RecordSDK\TXCloudRecord\include\TXCloudRecordCmd.h" />
-    <ClInclude Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -182,7 +181,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RecordSDK\jsoncpp\jsoncpp.cpp" />
     <ClCompile Include="RecordSDK\TXCloudRecord\include\TXCloudRecordCmd.cpp" />
-    <ClCompile Include="thirdparty\TXCloudRecord\include\TXCloudRecordCmd.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

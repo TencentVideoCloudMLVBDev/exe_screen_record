@@ -30,9 +30,6 @@
     <ClInclude Include="Common\log.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Application.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="thirdparty\jsoncpp\json.h">
       <Filter>thirdparty\jsoncpp</Filter>
     </ClInclude>
@@ -41,6 +38,9 @@
     </ClInclude>
     <ClInclude Include="Common\Base.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="TXCloudRecord.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -53,11 +53,11 @@
     <ClCompile Include="Common\log.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Application.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\jsoncpp\jsoncpp.cpp">
       <Filter>thirdparty\jsoncpp</Filter>
+    </ClCompile>
+    <ClCompile Include="TXCloudRecord.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,9 +1,9 @@
-#include "Application.h"
+#include "TXCloudRecord.h"
 #include "crashdump.h"
 
 int main(int argc, char *argv[])
 {
 	CrashDump dump;
 
-	return Application::instance().run(argc, argv);
+	return TXCloudRecord::instance().run(argc, argv);
 }
