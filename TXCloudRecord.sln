@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TXCloudRecord", "TXCloudRecord\TXCloudRecord.vcxproj", "{F5E312A3-315F-47A2-846B-FE1876FFDBC2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TXCloudRecordTest", "TXCloudRecordTest\TXCloudRecordTest.vcxproj", "{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5E312A3-315F-47A2-846B-FE1876FFDBC2}.Debug|x86.ActiveCfg = Debug|Win32
+		{F5E312A3-315F-47A2-846B-FE1876FFDBC2}.Debug|x86.Build.0 = Debug|Win32
+		{F5E312A3-315F-47A2-846B-FE1876FFDBC2}.Release|x86.ActiveCfg = Release|Win32
+		{F5E312A3-315F-47A2-846B-FE1876FFDBC2}.Release|x86.Build.0 = Release|Win32
+		{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}.Debug|x86.ActiveCfg = Debug|Win32
+		{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}.Debug|x86.Build.0 = Debug|Win32
+		{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}.Release|x86.ActiveCfg = Release|Win32
+		{BD4E4EA9-20E2-4E92-8F7D-AC1D7FBF60EF}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

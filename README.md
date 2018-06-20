@@ -1,14 +1,12 @@
-﻿
+﻿<h2>功能介绍</h2>
 
-<h2>功能介绍</h2>
-
-您可以把用户 exe 或其他窗体的屏幕录制下来，然后作为视频文件用于回看。适用于记录在线定损、互动课堂、远程庭审等场景。
+您可以把用户 exe 或其他窗体的屏幕录制下来，然后作为视频文件用于回看。支持本地录制及云端录制mp4文件。适用于记录在线定损、互动课堂、远程庭审等场景。
 
 
 
 ## 开启录制
 
-录制回看功能依托于腾讯云的**点播服务**支撑，如果您想要对接这个功能，首先需要在腾讯云的管理控制台[开通点播服务](http://console.cloud.tencent.com/video)。服务开通之后，新录制的文件就可以在点播控制台的 [视频管理](http://console.cloud.tencent.com/video/videolist) 里找到它们。
+本地录制无需开通任何服务即可满足您的需求。而云端录制回看功能则依托于腾讯云的**点播服务**支撑，如果您想要对接这个功能，首先需要在腾讯云的管理控制台[开通点播服务](http://console.cloud.tencent.com/video)。服务开通之后，新录制的文件就可以在点播控制台的 [视频管理](http://console.cloud.tencent.com/video/videolist) 里找到它们。
 
 那么怎么开启屏幕录制呢？您可以在配置工程后，用几个简单的接口使用我们的录制小工具：
 
@@ -35,12 +33,13 @@ $(ProjectDir)RecordSDK\jsoncpp
 
 3）将RecordSDK\dll中的文件拷贝到您的 exe 运行目录下，如图：
 
-![](https://main.qcloudimg.com/raw/af44b40d600ff11a4ae68e1fbc272420.png)
+![](https://main.qcloudimg.com/raw/2ec70b7009446103078c219a01076a1b.png)
 
 这里有几点要特别说明：
 
 - 目前录制功能默认使用的视频封装格式为 mp4（播放、下载及传输比较方便）。
-- mp4 文件默认分片时长为2小时，只要中途不断流，2小时内的直播内容都将录制在同一个 mp4 文件中。若中途停止推流，以实际推流时长为准。
+- 云端录制mp4 文件默认分片时长为2小时，只要中途不断流，2小时内的直播内容都将录制在同一个 mp4 文件中。若中途停止推流，以实际推流时长为准。
+- 本地录制mp4文件可以设置分片时间，建议录制时间设置为5~60分钟，需要调用停止或者退出接口才能看到完整的视频。
 
 
 
@@ -51,23 +50,26 @@ $(ProjectDir)RecordSDK\jsoncpp
 | 成员函数                          | 功能说明           |
 | ----------------------------- | -------------- |
 | [runAndRecord](#runAndRecord) | 启动录屏 exe 并开始录制 |
+| [update](#update)             | 更新录制参数继续进行录屏   |
 | [start](#start)               | 继续进行录屏         |
 | [stop](#stop)                 | 暂时停止录屏         |
 | [exit](#exit)                 | 退出录屏 exe 并结束录屏 |
 
 <h2 id="runAndRecord">runAndRecord</h2>
 
-- 接口定义：bool runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID = -1)
+- 接口定义：bool runAndRecord(RecordData recordData)
 - 接口说明：启动录屏 exe 并开始录制
 - 参数说明：
 
 ```c++
-{
-	recordType			     ScreenRecordType   录屏方式。暂时只支持RecordScreenToServer，即录制文件至云端
-	recordUrl		         string             推流地址
-	recordExe		         string             需要录制的exe名称
-	winID        			 int                需要录制的窗口句柄
-}
+struct RecordData{
+	ScreenRecordType recordType;      录屏方式。支持录制到本地/云端/同时录制到本地及云端
+	char  recordUrl[512];             推流地址
+	char  recordPath[512];
+	char  recordExe[64];              需要录制的exe名称
+	int sliceTime;					  本地录制mp4文件分片时长
+	int winID;                        需要录制的窗口句柄
+};
 ```
 
 - 注意事项：
@@ -81,8 +83,31 @@ $(ProjectDir)RecordSDK\jsoncpp
 - 示例代码：
 
 ```c++
-std::string url = "xxx";
-TXCloudRecordCmd::instance().runAndRecord(RecordScreenToServer, url, "chrome.exe");
+RecordData recordData;
+
+strcpy_s(recordData.recordExe, "xxx"); //待录制应用程序名称 例如chrome.exe
+strcpy_s(recordData.recordUrl, "xxx"); //需要改为推流地址
+strcpy_s(recordData.recordPath, "F:\\"); //保存路径，若没有以mp4结尾，会自动保存为路径+yyyy_mm_dd_hh_mm_ss.mp4格式
+recordData.recordType = RecordScreenToBoth;
+recordData.sliceTime = 60; //本地文件分片时长，以分钟为单位
+recordData.winID = -1;     //待录制窗口句柄
+
+TXCloudRecordCmd::instance().runAndRecord(recordData);
+```
+
+
+
+<h2 id="update">update</h2>
+
+- 接口定义：void update(RecordData recordData)
+- 接口说明：可更新参数后继续录屏
+
+
+- 示例代码：
+
+```c++
+recordData.recordType = RecordScreenToClient;
+TXCloudRecordCmd::instance().update(recordData);
 ```
 
 
@@ -129,7 +154,7 @@ TXCloudRecordCmd::instance().exit();
 
 
 
-## 获取文件
+## 获取云端文件
 
 一个新的录制视频文件生成后，会相应的生成一个观看地址，您可以结合自己的业务场景实现很多的扩展功能，比如：您可以将其追加到历史信息里，作为资料进行存档；或者将其放入回放列表中，经过专门的人工筛选，将优质的视频推荐给您的 App 用户。
 
@@ -180,7 +205,7 @@ TXCloudRecordCmd::instance().exit();
 
 ## 常见问题
 
-### 1. 直播录制的原理是什么？
+### 1. 云端直播录制的原理是什么？
 
 ![](https://main.qcloudimg.com/raw/cbb2aae6b5e767db1d30cb51d147948d.png)
 
