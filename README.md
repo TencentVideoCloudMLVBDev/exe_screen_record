@@ -162,7 +162,7 @@ TXCloudRecordCmd::instance().exit();
 
 ### 1. 被动监听通知
 
-您可以使用腾讯云的**[事件通知服务](https://cloud.tencent.com/document/product/267/5957)**：您的服务器注册一个自己的**回调URL**给腾讯云，腾讯云会在一个新的录制文件生成时通过这个URL通知给您。
+您可以使用腾讯云的[事件通知服务](https://cloud.tencent.com/document/product/267/5957)：您的服务器注册一个自己的**回调URL**给腾讯云，腾讯云会在一个新的录制文件生成时通过这个URL通知给您。
 
 ![](https://main.qcloudimg.com/raw/b50c901fb4d529daf3405e78bc69908d.png)
 
