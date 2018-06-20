@@ -42,6 +42,21 @@
     <ClInclude Include="TXCloudRecord.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Common\DataReport.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\commonType.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HttpClient.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\HttpReportRequest.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\TaskQueue.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -58,6 +73,18 @@
     </ClCompile>
     <ClCompile Include="TXCloudRecord.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\DataReport.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HttpClient.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\HttpReportRequest.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\TaskQueue.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

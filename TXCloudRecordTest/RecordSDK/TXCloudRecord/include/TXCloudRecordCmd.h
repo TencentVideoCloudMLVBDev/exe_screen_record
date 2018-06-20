@@ -15,9 +15,24 @@ enum ScreenRecordType
 
 enum ScreenRecordCmd
 {
-	ScreenRecordStart = 1001,
-	ScreenRecordStop = 1002,
-	ScreenRecordExit = 1003,
+	ScreenRecordUpdate = 1001,
+	ScreenRecordStart = 1002,
+	ScreenRecordStop = 1003,
+	ScreenRecordExit = 1004,
+};
+
+struct RecordData{
+	ScreenRecordType recordType;
+	char  recordUrl[512];
+	char  recordPath[512];
+	char  recordExe[64];
+	int sliceTime;
+	int winID;
+	RecordData()
+	{
+		this->winID = -1;
+		this->sliceTime = 60;
+	}
 };
 
 class TXCloudRecordCmd
@@ -28,7 +43,8 @@ public:
 	virtual ~TXCloudRecordCmd();
 	static TXCloudRecordCmd& instance();
 
-	bool runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID = -1);
+	bool runAndRecord(RecordData recordData);
+	void update(RecordData recordData);
 	void start();
 	void stop();
 	void exit();

@@ -81,25 +81,26 @@ TXCloudRecordCmd& TXCloudRecordCmd::instance()
 	return uniqueInstance;
 }
 
-bool TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string recordUrl, std::string recordExe, int winID)
+bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 {
-	LOGGER;
 	BOOL ret = FALSE;
-	if (recordType == RecordScreenNone || recordUrl.empty() || (recordExe.empty() && winID == -1))
+	if (recordData.recordType == RecordScreenNone || (recordData.recordUrl[0] == '\0' && recordData.recordPath[0] == '\0') || (recordData.recordExe[0] == '\0' && recordData.winID == -1))
 	{
 		return ret;
 	}
 	do
 	{
 		Json::Value root;
-		root["recordUrl"] = recordUrl;
-		root["recordExe"] = recordExe; //需要录制的exe名称。启动record之前就需要运行
+		root["recordUrl"] = recordData.recordUrl;
+		root["recordPath"] = recordData.recordPath;
+		root["sliceTime"] = recordData.sliceTime;
+		root["recordExe"] = recordData.recordExe; //需要录制的exe名称。启动record之前就需要运行
 		//root["winID"] = (int)GetDesktopWindow();  //需要录制的窗口句柄。winID和recordExe必须传一个，都传会录制recordExe内容
-		if (recordExe.empty() && winID != -1)
+		if (recordData.recordExe[0] == '\0' && recordData.winID != -1)
 		{
-			root["winID"] = winID;
+			root["winID"] = recordData.winID;
 		}
-		root["recordType"] = recordType;
+		root["recordType"] = recordData.recordType;
 
 		Json::FastWriter writer;
 		std::string jsonUTF8 = writer.write(root);
@@ -143,6 +144,21 @@ bool TXCloudRecordCmd::runAndRecord(ScreenRecordType recordType, std::string rec
 
 	} while (0);
 	return ret;
+}
+
+void TXCloudRecordCmd::update(RecordData recordData)
+{
+	LINFO(L"txcloudrecord update");
+	if (!m_recordHwnd)
+	{
+		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
+	}
+
+	if (m_recordHwnd)
+	{
+		COPYDATASTRUCT copy_data = { ScreenRecordUpdate, sizeof(recordData), &recordData};
+		::SendMessage(m_recordHwnd, WM_COPYDATA, ScreenRecordUpdate, reinterpret_cast<LPARAM>(&copy_data));
+	}
 }
 
 void TXCloudRecordCmd::exit()

@@ -1,6 +1,8 @@
 #include "TXCloudRecord.h"
 #include "Base.h"
 #include "TXLiveCommon.h"
+#include "DataReport.h"
+#include "HttpReportRequest.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <TlHelp32.h> 
@@ -15,7 +17,9 @@ TXLivePusher m_pusher;
 HWND m_hChooseHwnd = nullptr;
 std::string m_recordUrl;
 std::string m_recordPath;
+std::string m_recordExe;
 ScreenRecordType m_recordType = RecordScreenNone;
+int m_sliceTime = 60;
 
 static unsigned char ToHex(unsigned char x)
 {
@@ -77,6 +81,22 @@ static std::string URLDecode(const std::string& str)
 
 void startRecord()
 {
+	if (m_recordPath.rfind("mp4") == std::string::npos)
+	{
+		time_t rawtime;
+		struct tm * timeinfo;
+		char buffer[80];
+
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+
+		strftime(buffer, sizeof(buffer), "%Y_%m_%d_%H_%M_%S", timeinfo);
+		std::string strtime(buffer);
+
+		m_recordPath.append(strtime);
+		m_recordPath.append(".mp4");
+	}
+
 	RECT captureRect = { 0 };
 	RECT renderRect = { 0 };
 	m_pusher.setVideoQualityParamPreset(TXE_VIDEO_QUALITY_STILLIMAGE_DEFINITION);
@@ -100,7 +120,7 @@ void startRecord()
 	}
 	else if (m_recordType == RecordScreenToClient)
 	{
-		m_pusher.startLocalRecord(m_recordPath.c_str(), 60 * 60);
+		m_pusher.startLocalRecord(m_recordPath.c_str(), m_sliceTime * 60);
 	}
 	else if (m_recordType == RecordScreenToBoth)
 	{
@@ -112,8 +132,12 @@ void startRecord()
 
 		m_recordUrl = m_recordUrl;
 		m_pusher.startPush(m_recordUrl.c_str());
-		m_pusher.startLocalRecord(m_recordPath.c_str(), 60 * 60);
+		m_pusher.startLocalRecord(m_recordPath.c_str(), m_sliceTime * 60);
 	}
+
+	DataReport::instance().setResult("success", "start", "");
+	DataReport::instance().setRecordInfo(m_recordType, m_recordUrl, m_recordExe, m_sliceTime);
+	HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 }
 
 void stopRecord()
@@ -134,6 +158,9 @@ void stopRecord()
 		m_pusher.stopPush();
 		m_pusher.stopLocalRecord();
 	}
+	DataReport::instance().setResult("success", "stop", "");
+	DataReport::instance().setRecordInfo(m_recordType, m_recordUrl, m_recordExe, m_sliceTime);
+	HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 }
 
 TXCloudRecord::TXCloudRecord()
@@ -155,13 +182,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	if (message == WM_COPYDATA)
 	{
 		COPYDATASTRUCT* copy_data = reinterpret_cast<COPYDATASTRUCT*>(lParam);
-		const char* message = reinterpret_cast<const char*>(copy_data->lpData);
-		LINFO(L"recv message:%s", message);
 
 		switch (wParam)
 		{
+		case ScreenRecordUpdate:
+		{
+			RecordData* message = reinterpret_cast<RecordData*>(copy_data->lpData);
+			LINFO(L"recv message: update");
+			if (message->recordType != RecordScreenNone)
+			{
+				if (InSendMessage())
+					ReplyMessage(0);
+				stopRecord();
+				m_recordPath = message->recordPath;
+				m_recordUrl = message->recordUrl;
+				m_sliceTime = message->sliceTime;
+				m_recordType = message->recordType;
+				startRecord();
+			}
+		}
+		break;
 		case ScreenRecordStart:
 		{
+			const char* message = reinterpret_cast<const char*>(copy_data->lpData);
+			LINFO(L"recv message:%s", message);
 			if (!strcmp(message, "RecordStart"))
 			{
 				if (InSendMessage())
@@ -173,6 +217,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 		case ScreenRecordStop:
 		{
+			const char* message = reinterpret_cast<const char*>(copy_data->lpData);
+			LINFO(L"recv message:%s", message);
 			if (!strcmp(message, "RecordStop"))
 			{
 				if (InSendMessage())
@@ -184,12 +230,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 		case ScreenRecordExit:
 		{
+			const char* message = reinterpret_cast<const char*>(copy_data->lpData);
+			LINFO(L"recv message:%s", message);
 			if (!strcmp(message, "RecordExit"))
 			{
 				if (InSendMessage())
 					ReplyMessage(0);
 
 				stopRecord();
+				DataReport::instance().setResult("success", "exit", "");
+				DataReport::instance().setRecordInfo(m_recordType, m_recordUrl, m_recordExe, m_sliceTime);
+				HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 				exit(0);
 			}
 		}
@@ -313,6 +364,8 @@ int TXCloudRecord::run(int &argc, char **argv)
 		if (std::string::npos == index)
 		{
 			LINFO(L"error cmd");
+			DataReport::instance().setResult("fail", "error", "error cmd");
+			HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 			break;
 		}
 
@@ -324,6 +377,8 @@ int TXCloudRecord::run(int &argc, char **argv)
 		if (false == reader.parse(jsonDecode, root))
 		{
 			LINFO(L"error json");
+			DataReport::instance().setResult("fail", "error", "error json");
+			HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 			break;;
 		}
 
@@ -335,7 +390,9 @@ int TXCloudRecord::run(int &argc, char **argv)
 
 		if (m_recordType == RecordScreenNone)
 		{
-			LINFO(L"record type none");
+			LINFO(L"record type none");			
+			DataReport::instance().setResult("fail", "error", "record type none");
+			HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 			break;
 		}
 
@@ -349,16 +406,20 @@ int TXCloudRecord::run(int &argc, char **argv)
 			m_recordPath = root["recordPath"].asString();
 		}
 
+		if (root.isMember("sliceTime"))
+		{
+			m_sliceTime = root["sliceTime"].asInt();
+		}
+
 		if (m_recordUrl.empty() && m_recordPath.empty())
 		{
 			LINFO(L"empty recordurl and recordpath");
 			break;
 		}
 
-		std::string recordExe;
 		if (root.isMember("recordExe"))
 		{
-			recordExe = root["recordExe"].asString();
+			m_recordExe = root["recordExe"].asString();
 		}
 
 		int winID = -1;
@@ -367,9 +428,11 @@ int TXCloudRecord::run(int &argc, char **argv)
 			winID = root["winID"].asInt();
 		}
 
-		if (recordExe.empty() && winID == -1)
+		if (m_recordExe.empty() && winID == -1)
 		{
 			LINFO(L"empty recordExe name && winID");
+			DataReport::instance().setResult("fail", "error", "empty recordExe name && winID");
+			HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 			break;
 		}
 
@@ -396,13 +459,13 @@ int TXCloudRecord::run(int &argc, char **argv)
 
 		m_hChooseHwnd = nullptr;
 
-		if (!recordExe.empty())
+		if (!m_recordExe.empty())
 		{
 			std::vector<CAPTUREWINDOWINFOEX> windowVec;
 			BOOL bRet = EnumWindows(EnumTaskbarWnds, (LPARAM)&windowVec);
 			for (int i = 0; i < windowVec.size(); i++)
 			{
-				if (!strcmp(windowVec[i].strWndName.c_str(), recordExe.c_str()))
+				if (!strcmp(windowVec[i].strWndName.c_str(), m_recordExe.c_str()))
 				{
 					m_hChooseHwnd = windowVec[i].hWnd;
 					break;
@@ -415,6 +478,8 @@ int TXCloudRecord::run(int &argc, char **argv)
 		if (!m_hChooseHwnd)
 		{
 			LINFO(L"error exe name or the exe doesn't run, or error winid");
+			DataReport::instance().setResult("fail", "error", "error hwnd");
+			HttpReportRequest::instance().reportELK(DataReport::instance().getRecordReport());
 			break;
 		}
 

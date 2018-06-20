@@ -6,21 +6,7 @@
 #include "json.h"
 #include "log.h"
 #include "TXLivePusher.h"
-
-enum ScreenRecordType
-{
-	RecordScreenNone = 0,
-	RecordScreenToServer = 1,
-	RecordScreenToClient = 2,
-	RecordScreenToBoth = 3,
-};
-
-enum ScreenRecordCmd
-{
-	ScreenRecordStart = 1001,
-	ScreenRecordStop = 1002,
-	ScreenRecordExit = 1003,
-};
+#include "commonType.h"
 
 class TXCloudRecord
 {
