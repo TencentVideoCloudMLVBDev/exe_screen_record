@@ -1,7 +1,10 @@
 #include "TXCloudRecordCmd.h"
 #include <Psapi.h>
 #include <Shellapi.h>
-#include <assert.h>  
+#include <assert.h>
+#include <shellapi.h>
+#include <TlHelp32.h>
+
 #pragma comment (lib,"Psapi.lib")
 
 #define WINDOW_CLASS_NAME TEXT("TXCloudRecord")
@@ -67,6 +70,8 @@ static std::string URLDecode(const std::string& str)
 }
 
 TXCloudRecordCmd::TXCloudRecordCmd()
+	: m_recordHwnd(nullptr)
+	, m_isExits(false)
 {
 }
 
@@ -84,10 +89,12 @@ TXCloudRecordCmd& TXCloudRecordCmd::instance()
 bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 {
 	BOOL ret = FALSE;
-	if (recordData.recordType == RecordScreenNone || (recordData.recordUrl[0] == '\0' && recordData.recordPath[0] == '\0') || (recordData.recordExe[0] == '\0' && recordData.winID == -1))
+	if (recordData.recordType == RecordScreenNone || (recordData.recordUrl[0] == '\0' && recordData.recordPath[0] == '\0')
+		|| (recordData.recordExe[0] == '\0' && recordData.winID == -1))
 	{
 		return ret;
 	}
+
 	do
 	{
 		Json::Value root;
@@ -95,12 +102,14 @@ bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 		root["recordPath"] = recordData.recordPath;
 		root["sliceTime"] = recordData.sliceTime;
 		root["recordExe"] = recordData.recordExe; //需要录制的exe名称。启动record之前就需要运行
-		//root["winID"] = (int)GetDesktopWindow();  //需要录制的窗口句柄。winID和recordExe必须传一个，都传会录制recordExe内容
+												  //root["winID"] = (int)GetDesktopWindow();  //需要录制的窗口句柄。winID和recordExe必须传一个，都传会录制recordExe内容
 		if (recordData.recordExe[0] == '\0' && recordData.winID != -1)
 		{
 			root["winID"] = recordData.winID;
 		}
+
 		root["recordType"] = recordData.recordType;
+		root["parentPid"] = static_cast<uint64_t>(::GetCurrentProcessId()); // 传入父进程pid，record进程会监听父进程是否存活
 
 		Json::FastWriter writer;
 		std::string jsonUTF8 = writer.write(root);
@@ -117,7 +126,7 @@ bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 		path.append("\\");
 		path.append(RecordExe);
 
-		
+
 		SHELLEXECUTEINFOA sei = { 0 };
 		sei.cbSize = sizeof(SHELLEXECUTEINFOA);
 		sei.fMask = SEE_MASK_NOCLOSEPROCESS;
@@ -142,6 +151,7 @@ bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 			return false;
 		}
 
+		m_isExits = true;
 	} while (0);
 	return ret;
 }
@@ -149,6 +159,7 @@ bool TXCloudRecordCmd::runAndRecord(RecordData recordData)
 void TXCloudRecordCmd::update(RecordData recordData)
 {
 	LINFO(L"txcloudrecord update");
+
 	if (!m_recordHwnd)
 	{
 		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
@@ -156,14 +167,17 @@ void TXCloudRecordCmd::update(RecordData recordData)
 
 	if (m_recordHwnd)
 	{
-		COPYDATASTRUCT copy_data = { ScreenRecordUpdate, sizeof(recordData), &recordData};
-		::SendMessage(m_recordHwnd, WM_COPYDATA, ScreenRecordUpdate, reinterpret_cast<LPARAM>(&copy_data));
+		COPYDATASTRUCT copy_data = { ScreenRecordUpdate, sizeof(recordData), &recordData };
+
+		DWORD_PTR dwResult = 0;
+		::SendMessageTimeout(m_recordHwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(m_recordHwnd), reinterpret_cast<LPARAM>(&copy_data), SMTO_BLOCK, 3000, &dwResult);
 	}
 }
 
 void TXCloudRecordCmd::exit()
 {
 	LINFO(L"txcloudrecord exit");
+
 	if (!m_recordHwnd)
 	{
 		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
@@ -171,15 +185,20 @@ void TXCloudRecordCmd::exit()
 
 	if (m_recordHwnd)
 	{
-		std::string message = "RecordExit";
-		COPYDATASTRUCT copy_data = { ScreenRecordExit, message.length() + 1,(LPVOID)message.c_str() };
-		::SendMessage(m_recordHwnd, WM_COPYDATA, ScreenRecordExit, reinterpret_cast<LPARAM>(&copy_data));
+		COPYDATASTRUCT copy_data = { ScreenRecordExit, 0, NULL };
+
+		DWORD_PTR dwResult = 0;
+		::SendMessageTimeout(m_recordHwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(m_recordHwnd), reinterpret_cast<LPARAM>(&copy_data), SMTO_BLOCK, 3000, &dwResult);
 	}
+
+	m_isExits = false;
+	m_recordHwnd = nullptr;
 }
 
 void TXCloudRecordCmd::start()
 {
 	LINFO(L"txcloudrecord start");
+
 	if (!m_recordHwnd)
 	{
 		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
@@ -187,15 +206,17 @@ void TXCloudRecordCmd::start()
 
 	if (m_recordHwnd)
 	{
-		std::string message = "RecordStart";
-		COPYDATASTRUCT copy_data = { ScreenRecordStart, message.length() + 1,(LPVOID)message.c_str() };
-		::SendMessage(m_recordHwnd, WM_COPYDATA, ScreenRecordStart, reinterpret_cast<LPARAM>(&copy_data));
+		COPYDATASTRUCT copy_data = { ScreenRecordStart, 0, NULL };
+
+		DWORD_PTR dwResult = 0;
+		::SendMessageTimeout(m_recordHwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(m_recordHwnd), reinterpret_cast<LPARAM>(&copy_data), SMTO_BLOCK, 3000, &dwResult);
 	}
 }
 
 void TXCloudRecordCmd::stop()
 {
 	LINFO(L"txcloudrecord stop");
+
 	if (!m_recordHwnd)
 	{
 		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
@@ -203,8 +224,21 @@ void TXCloudRecordCmd::stop()
 
 	if (m_recordHwnd)
 	{
-		std::string message = "RecordStop";
-		COPYDATASTRUCT copy_data = { ScreenRecordStop, message.length() + 1,(LPVOID)message.c_str() };
-		::SendMessage(m_recordHwnd, WM_COPYDATA, ScreenRecordStop, reinterpret_cast<LPARAM>(&copy_data));
+		COPYDATASTRUCT copy_data = { ScreenRecordStop, 0, NULL };
+
+		DWORD_PTR dwResult = 0;
+		::SendMessageTimeout(m_recordHwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(m_recordHwnd), reinterpret_cast<LPARAM>(&copy_data), SMTO_BLOCK, 3000, &dwResult);
+	}
+}
+
+bool TXCloudRecordCmd::isExist()
+{
+	if (false == m_isExits)
+	{
+		return m_isExits;
+	}
+	else
+	{
+		m_recordHwnd = FindWindowExA(HWND_MESSAGE, NULL, "TXCloudRecord", "TXCloudRecordCaption");
 	}
 }

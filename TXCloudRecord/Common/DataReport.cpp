@@ -50,12 +50,12 @@ uint64_t DataReport::txf_gettickspan(uint64_t lastTick) {
 	}
 }
 
-void DataReport::setRecordInfo(ScreenRecordType recordType, std::string str_record_url, std::string str_record_exe, int sliceTime)
+void DataReport::setRecordInfo(ScreenRecordType recordType, std::string str_record_url, std::string str_record_exe, uint32_t sliceTime)
 {
 	m_recordReport.recordType = recordType;
 	m_recordReport.str_record_url = str_record_url;
 	m_recordReport.str_record_exe = str_record_exe;
-	m_recordReport.sliceTime = sliceTime;
+	m_recordReport.int32_sliceTime = sliceTime;
 }
 
 void DataReport::setResult(std::string result, std::string action, std::string reason)
@@ -71,9 +71,11 @@ std::string DataReport::getRecordReport()
 	Json::Value root;
 
 	root["type"] = m_recordReport.type;
+	root["bussiness"] = m_recordReport.bussiness;
+	root["platform"] = m_recordReport.platform;
 	root["str_app_name"] = m_recordReport.str_app_name;
 	root["str_token"] = m_recordReport.str_token;
-	root["int32_app_id"] = m_recordReport.int32_sdkappid;
+	root["int32_sdkapp_id"] = m_recordReport.int32_sdkappid;
 
 	root["str_device_type"] = m_recordReport.str_device_type;
 	root["str_app_version"] = m_recordReport.str_app_version;
@@ -82,7 +84,7 @@ std::string DataReport::getRecordReport()
 	root["recordType"] = m_recordReport.recordType;
 	root["str_record_url"] = m_recordReport.str_record_url;
 	root["str_record_exe"] = m_recordReport.str_record_exe;
-	root["sliceTime"] = m_recordReport.sliceTime;
+	root["int32_sliceTime"] = m_recordReport.int32_sliceTime;
 
 	root["str_action"] = m_recordReport.str_action;
 	root["str_result"] = m_recordReport.str_result;

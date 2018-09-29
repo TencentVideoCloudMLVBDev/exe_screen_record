@@ -92,6 +92,7 @@ void Log::Write(ENM_LOGGER_LEVEL logLevel,
     if (NULL != file)
     {
         ::fputws(szLog, file);
+        ::fflush(file);
     }
 }
 
@@ -128,7 +129,7 @@ FILE* Log::_CreateFile()
         SYSTEMTIME sys_time = { 0 };
         ::GetLocalTime(&sys_time);
 
-        ::swprintf_s(filePath, _countof(filePath) - 1, L"%s%04u_%02u_%02u_%02u_%02u_%02u_%d.log"
+        ::swprintf_s(filePath, _countof(filePath) - 1, L"%sTXCloudRecord_%04u_%02u_%02u_%02u_%02u_%02u_%d.log"
             , parentDir.c_str()
             , sys_time.wYear, sys_time.wMonth, sys_time.wDay
             , sys_time.wHour, sys_time.wMinute, sys_time.wSecond, i);
@@ -139,8 +140,7 @@ FILE* Log::_CreateFile()
         }
     }
 
-    FILE* file = NULL;
-    ::_wfopen_s(&file, filePath, L"wb+");
+    FILE* file = ::_wfsopen(filePath, L"wb+", _SH_DENYWR);
 
     return file;
 }

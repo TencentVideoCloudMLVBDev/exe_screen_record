@@ -21,17 +21,22 @@ enum ScreenRecordCmd
 	ScreenRecordExit = 1004,
 };
 
-struct RecordData{
+struct RecordData {
 	ScreenRecordType recordType;
 	char  recordUrl[512];
 	char  recordPath[512];
 	char  recordExe[64];
 	int sliceTime;
 	int winID;
+
 	RecordData()
+		: recordType(RecordScreenNone)
+		, sliceTime(60)
+		, winID(-1)
 	{
-		this->winID = -1;
-		this->sliceTime = 60;
+		::memset(recordUrl, '\0', sizeof(recordUrl));
+		::memset(recordPath, '\0', sizeof(recordPath));
+		::memset(recordExe, '\0', sizeof(recordExe));
 	}
 };
 
@@ -49,6 +54,8 @@ public:
 	void stop();
 	void exit();
 
+	bool isExist();
 private:
 	HWND m_recordHwnd = nullptr;
+	bool m_isExits;
 };

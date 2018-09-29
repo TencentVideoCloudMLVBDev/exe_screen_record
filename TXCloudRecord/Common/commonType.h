@@ -19,22 +19,29 @@ enum ScreenRecordCmd
 };
 
 struct RecordData {
-	ScreenRecordType recordType;
-	char  recordUrl[512];
-	char  recordPath[512];
-	char  recordExe[64];
-	int sliceTime;
-	int winID;
-	RecordData()
-	{
-		this->winID = -1;
-		this->sliceTime = 60;
-	}
+    ScreenRecordType recordType;
+    char  recordUrl[512];
+    char  recordPath[512];
+    char  recordExe[64];
+    int sliceTime;
+    int winID;
+
+    RecordData()
+        : recordType(RecordScreenNone)
+        , sliceTime(60)
+        , winID(-1)
+    {
+        ::memset(recordUrl, '\0', sizeof(recordUrl));
+        ::memset(recordPath, '\0', sizeof(recordPath));
+        ::memset(recordExe, '\0', sizeof(recordExe));
+    }
 };
 
 struct RecordDataReport
 {
 	std::string type;
+	std::string bussiness;
+	std::string platform;
 	std::string str_app_name;
 	std::string str_token;
 	uint32_t int32_sdkappid;
@@ -46,7 +53,7 @@ struct RecordDataReport
 	ScreenRecordType recordType;
 	std::string str_record_url;
 	std::string str_record_exe;
-	int sliceTime;
+	uint32_t int32_sliceTime;
 
 	std::string str_action;
 	std::string str_result;
@@ -55,7 +62,9 @@ struct RecordDataReport
 	RecordDataReport()
 	{
 		this->int32_sdkappid = 0;
-		this->type = "webexe";
+		this->type = "event";
+		this->bussiness = "webexe";
+		this->platform = "pc";
 		this->str_app_name = "TXCloudRecord";
 	}
 };

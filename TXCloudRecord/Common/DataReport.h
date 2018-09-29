@@ -19,7 +19,7 @@ public:
 	uint64_t txf_gettickspan(uint64_t lastTick);
 
 
-	void setRecordInfo(ScreenRecordType recordType, std::string str_record_url, std::string str_record_exe, int sliceTime);
+	void setRecordInfo(ScreenRecordType recordType, std::string str_record_url, std::string str_record_exe, uint32_t sliceTime);
 	void setResult(std::string result, std::string action, std::string reason = "");
 
 	//getreport

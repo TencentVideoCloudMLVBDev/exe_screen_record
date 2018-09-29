@@ -16,8 +16,9 @@ protected:
 public:
 	virtual ~TXCloudRecord();
 	static TXCloudRecord& instance();
-	int run(int &argc, char **argv);
 
+	int run(int &argc, char **argv);
+    void quit();
 private:
 	std::string m_jsonCmd;
 };
